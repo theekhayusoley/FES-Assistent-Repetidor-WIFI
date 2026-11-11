@@ -12,7 +12,7 @@ NOMS_CONFIGURACIO = [
 PUNTS_PER_DEFECTE = ["Menjador", "Dormitori", "Cuina", "Despatx", "Passadís"]
 
 
-def main(page: ft.Page):
+def main(page):
     page.title = "Assistent Wi-Fi"
     page.padding = 16
     page.scroll = ft.ScrollMode.AUTO
