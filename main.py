@@ -19,7 +19,7 @@ def main(page: ft.Page):
 
     llindar = ft.TextField(label="Llindar mínim (dBm)", value="-67", width=210)
     camps_punts = []
-    camps_mesures = {}
+    camps_mesures = []
     targetes = []
 
     for i in range(5):
@@ -37,8 +37,9 @@ def main(page: ft.Page):
         for j in range(3):
             nom_configuracio = NOMS_CONFIGURACIO[j]
             camp = ft.TextField(label=nom_configuracio, hint_text="Ex. -65")
-            camps_mesures[(i, j)] = camp
             camps_configuracio.append(camp)
+
+        camps_mesures.append(camps_configuracio)
 
         targetes.append(
             ft.Container(
@@ -76,11 +77,13 @@ def main(page: ft.Page):
         valor_llindar = convertir_rssi(llindar.value, "llindar")
         configuracions = []
 
-        for j, nom_configuracio in enumerate(NOMS_CONFIGURACIO):
+        for j in range(3):
+            nom_configuracio = NOMS_CONFIGURACIO[j]
             mesures = {}
 
-            for i, punt in enumerate(punts):
-                valor = camps_mesures[(i, j)].value
+            for i in range(5):
+                punt = punts[i]
+                valor = camps_mesures[i][j].value
                 mesures[punt] = convertir_rssi(valor, punt)
 
             configuracions.append(Configuracio(nom_configuracio, mesures))
