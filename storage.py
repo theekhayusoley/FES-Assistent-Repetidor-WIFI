@@ -1,8 +1,6 @@
 import json
 from pathlib import Path
 
-from models import Configuracio
-
 
 def guardar_dades(punts, llindar, configuracions, ruta):
     """Desa les mesures en un fitxer JSON."""
