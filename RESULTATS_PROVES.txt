@@ -14,6 +14,6 @@ Casos comprovats:
 - Desament i càrrega de fitxers JSON.
 - Gestió de fitxers JSON inexistents o mal formats.
 
-També s'ha executat el flux principal de terminal amb dades sintètiques: el programa ha analitzat les tres configuracions i ha recomanat l'endoll B en l'exemple inclòs.
+La interfície Flet també s'ha obert en un ordinador i s'ha comprovat visualment el càlcul de cobertura amb dades introduïdes manualment.
 
-Nota: les dades de demostració són sintètiques, no mesures reals d'un habitatge. La interfície Flet està implementada però encara cal validar-la en un ordinador amb Flet instal·lat.
+Nota: les dades utilitzades per a aquesta demostració són d'exemple i no representen mesures reals d'un habitatge. Encara queda pendent fer una prova completa de desament i recuperació des de la interfície.
