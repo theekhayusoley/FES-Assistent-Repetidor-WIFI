@@ -160,10 +160,17 @@ def main(page):
 
             for i in range(5):
                 nom = dades["punts"][i]
-                if not isinstance(nom, str) or nom.strip() == "":
+                try:
+                    nom = nom.strip()
+                except AttributeError:
                     raise ValueError("El nom d'un punt del fitxer no és correcte.")
+
+                if nom == "":
+                    raise ValueError("El nom d'un punt del fitxer no és correcte.")
+
                 if nom in punts:
                     raise ValueError("El fitxer conté noms de punts repetits.")
+
                 punts.append(nom)
 
             llindar = convertir_rssi(dades["llindar"], "llindar")
