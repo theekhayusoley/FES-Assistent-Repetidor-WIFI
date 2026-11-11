@@ -9,7 +9,11 @@ class TestAnalisi(unittest.TestCase):
         self.punts = ["Menjador", "Dormitori", "Cuina", "Despatx", "Passadis"]
 
     def crear_configuracio(self, nom, valors):
-        mesures = dict(zip(self.punts, valors))
+        mesures = {}
+
+        for i in range(len(self.punts)):
+            mesures[self.punts[i]] = valors[i]
+
         return Configuracio(nom, mesures)
 
     def test_guanya_configuracio_amb_mes_punts_correctes(self):
@@ -38,7 +42,7 @@ class TestAnalisi(unittest.TestCase):
             self.crear_configuracio("Endoll B", [-50, -65, -65, -65, -85])
         ]
         resultat = comparar_configuracions(configuracions, -67)
-        self.assertEqual(set(resultat["guanyadores"]), {"Router", "Endoll A"})
+        self.assertEqual(resultat["guanyadores"], ["Router", "Endoll A"])
 
     def test_falten_mesures(self):
         configuracions = [
@@ -54,6 +58,10 @@ class TestAnalisi(unittest.TestCase):
             convertir_rssi("no és un número")
         with self.assertRaises(ValueError):
             convertir_rssi(-130)
+        with self.assertRaises(ValueError):
+            convertir_rssi(1)
+        with self.assertRaises(ValueError):
+            convertir_rssi("nan")
 
     def test_accepta_coma_decimal(self):
         self.assertEqual(convertir_rssi("-65,5"), -65.5)
@@ -72,6 +80,13 @@ class TestAnalisi(unittest.TestCase):
             self.crear_configuracio("Router", [-50, -60, -60, -60, -80]),
             Configuracio("Endoll A", {"A": -50, "B": -60, "C": -60, "D": -60, "E": -80}),
             self.crear_configuracio("Endoll B", [-50, -60, -60, -60, -80])
+        ]
+        with self.assertRaises(ValueError):
+            comparar_configuracions(configuracions, -67)
+
+    def test_calen_exactament_tres_configuracions(self):
+        configuracions = [
+            self.crear_configuracio("Router", [-50, -60, -70, -80, -65])
         ]
         with self.assertRaises(ValueError):
             comparar_configuracions(configuracions, -67)
