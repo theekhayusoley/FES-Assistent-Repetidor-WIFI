@@ -29,29 +29,24 @@ def carregar_dades(ruta):
     except json.JSONDecodeError:
         raise ValueError("El fitxer de mesures no conté un JSON vàlid.")
 
-    if not isinstance(dades, dict):
-        raise ValueError("El contingut del fitxer no és correcte.")
+    try:
+        if "punts" not in dades or "llindar" not in dades or "configuracions" not in dades:
+            raise ValueError("El fitxer no conté totes les dades necessàries.")
 
-    if "punts" not in dades or "llindar" not in dades or "configuracions" not in dades:
-        raise ValueError("El fitxer no conté totes les dades necessàries.")
+        if len(dades["punts"]) != 5:
+            raise ValueError("El fitxer ha de contenir cinc punts de mesura.")
 
-    if not isinstance(dades["punts"], list) or len(dades["punts"]) != 5:
-        raise ValueError("El fitxer ha de contenir cinc punts de mesura.")
+        if len(dades["configuracions"]) != 3:
+            raise ValueError("El fitxer ha de contenir tres configuracions.")
 
-    if not isinstance(dades["configuracions"], list) or len(dades["configuracions"]) != 3:
-        raise ValueError("El fitxer ha de contenir tres configuracions.")
+        for configuracio in dades["configuracions"]:
+            if "nom" not in configuracio or "mesures" not in configuracio:
+                raise ValueError("Falten dades d'una configuració.")
 
-    for configuracio in dades["configuracions"]:
-        if not isinstance(configuracio, dict):
-            raise ValueError("Una configuració del fitxer no és correcta.")
+            if len(configuracio["mesures"]) != 5:
+                raise ValueError("Cada configuració ha de tenir cinc mesures.")
 
-        if "nom" not in configuracio or "mesures" not in configuracio:
-            raise ValueError("Falten dades d'una configuració.")
-
-        if not isinstance(configuracio["mesures"], dict):
-            raise ValueError("Les mesures del fitxer no són correctes.")
-
-        if len(configuracio["mesures"]) != 5:
-            raise ValueError("Cada configuració ha de tenir cinc mesures.")
+    except (TypeError, KeyError):
+        raise ValueError("L'estructura del fitxer no és correcta.")
 
     return dades
