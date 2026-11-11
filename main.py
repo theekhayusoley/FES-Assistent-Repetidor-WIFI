@@ -22,15 +22,20 @@ def main(page: ft.Page):
     camps_mesures = {}
     targetes = []
 
-    for i, nom in enumerate(PUNTS_PER_DEFECTE):
+    for i in range(5):
         camps_punts.append(
-            ft.TextField(label=f"Nom del punt {i + 1}", value=nom, expand=True)
+            ft.TextField(
+                label=f"Nom del punt {i + 1}",
+                value=PUNTS_PER_DEFECTE[i],
+                expand=True
+            )
         )
 
     for i in range(5):
         camps_configuracio = []
 
-        for j, nom_configuracio in enumerate(NOMS_CONFIGURACIO):
+        for j in range(3):
+            nom_configuracio = NOMS_CONFIGURACIO[j]
             camp = ft.TextField(label=nom_configuracio, hint_text="Ex. -65")
             camps_mesures[(i, j)] = camp
             camps_configuracio.append(camp)
