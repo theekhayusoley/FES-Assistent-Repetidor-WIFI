@@ -1,35 +1,16 @@
-"""Models for the Wi-Fi repeater placement assistant."""
-
-from dataclasses import dataclass, field
-from typing import Dict, List
-
-
-@dataclass
 class Configuracio:
-    """One Wi-Fi setup and the RSSI readings measured at five locations."""
+    """Representa una configuració de la xarxa Wi-Fi."""
 
-    nom: str
-    mesures: Dict[str, float] = field(default_factory=dict)
+    def __init__(self, nom, mesures):
+        self.nom = nom
+        self.mesures = mesures
 
 
-@dataclass
 class ResultatConfiguracio:
-    """Coverage analysis for one Wi-Fi setup."""
+    """Guarda el resultat de l'anàlisi d'una configuració."""
 
-    nom: str
-    punts_correctes: int
-    senyal_minim: float
-    punts_febles: List[str] = field(default_factory=list)
-
-
-@dataclass
-class ResultatComparacio:
-    """Comparison of all candidate setups."""
-
-    llindar: float
-    resultats: List[ResultatConfiguracio]
-    guanyadores: List[str]
-
-    @property
-    def hi_ha_empat(self) -> bool:
-        return len(self.guanyadores) > 1
+    def __init__(self, nom, punts_correctes, senyal_minim, punts_febles):
+        self.nom = nom
+        self.punts_correctes = punts_correctes
+        self.senyal_minim = senyal_minim
+        self.punts_febles = punts_febles
