@@ -9,7 +9,11 @@ class TestAnalisi(unittest.TestCase):
         self.punts = ["Menjador", "Dormitori", "Cuina", "Despatx", "Passadis"]
 
     def crear_configuracio(self, nom, valors):
-        mesures = dict(zip(self.punts, valors))
+        mesures = {}
+
+        for i in range(len(self.punts)):
+            mesures[self.punts[i]] = valors[i]
+
         return Configuracio(nom, mesures)
 
     def test_guanya_configuracio_amb_mes_punts_correctes(self):
@@ -18,6 +22,7 @@ class TestAnalisi(unittest.TestCase):
             self.crear_configuracio("Endoll A", [-50, -60, -60, -60, -80]),
             self.crear_configuracio("Endoll B", [-50, -80, -80, -80, -80])
         ]
+
         resultat = comparar_configuracions(configuracions, -67)
         self.assertEqual(resultat["guanyadores"], ["Endoll A"])
 
@@ -27,6 +32,7 @@ class TestAnalisi(unittest.TestCase):
             self.crear_configuracio("Endoll A", [-50, -60, -60, -60, -75]),
             self.crear_configuracio("Endoll B", [-50, -60, -60, -60, -80])
         ]
+
         resultat = comparar_configuracions(configuracions, -67)
         self.assertEqual(resultat["guanyadores"], ["Endoll A"])
 
@@ -37,8 +43,9 @@ class TestAnalisi(unittest.TestCase):
             self.crear_configuracio("Endoll A", mesures),
             self.crear_configuracio("Endoll B", [-50, -65, -65, -65, -85])
         ]
+
         resultat = comparar_configuracions(configuracions, -67)
-        self.assertEqual(set(resultat["guanyadores"]), {"Router", "Endoll A"})
+        self.assertEqual(resultat["guanyadores"], ["Router", "Endoll A"])
 
     def test_falten_mesures(self):
         configuracions = [
@@ -46,12 +53,14 @@ class TestAnalisi(unittest.TestCase):
             Configuracio("Endoll A", {"Menjador": -50}),
             self.crear_configuracio("Endoll B", [-50, -60, -60, -60, -80])
         ]
+
         with self.assertRaises(ValueError):
             comparar_configuracions(configuracions, -67)
 
     def test_valor_rssi_incorrecte(self):
         with self.assertRaises(ValueError):
             convertir_rssi("no és un número")
+
         with self.assertRaises(ValueError):
             convertir_rssi(-130)
 
@@ -64,6 +73,7 @@ class TestAnalisi(unittest.TestCase):
             self.crear_configuracio("Endoll A", [-50, -60, -60, -60, -80]),
             self.crear_configuracio("Endoll B", [-50, -60, -60, -60, -80])
         ]
+
         with self.assertRaises(ValueError):
             comparar_configuracions(configuracions, "")
 
@@ -73,6 +83,7 @@ class TestAnalisi(unittest.TestCase):
             Configuracio("Endoll A", {"A": -50, "B": -60, "C": -60, "D": -60, "E": -80}),
             self.crear_configuracio("Endoll B", [-50, -60, -60, -60, -80])
         ]
+
         with self.assertRaises(ValueError):
             comparar_configuracions(configuracions, -67)
 
