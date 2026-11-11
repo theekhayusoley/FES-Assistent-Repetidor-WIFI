@@ -1,0 +1,19 @@
+RESULTATS DE LES PROVES INICIALS
+
+Comanda: python -m unittest discover -s tests -v
+Resultat: 11 proves superades, 0 errors, 0 fallades.
+
+Casos comprovats:
+- Guanya la configuració amb més punts que compleixen el llindar.
+- Desempat mitjançant el senyal del punt més feble.
+- Empat final entre configuracions equivalents.
+- Detecció de mesures incompletes.
+- Rebuig de valors RSSI incorrectes i llindar invàlid.
+- Acceptació de coma decimal.
+- Detecció de punts de mesura diferents entre configuracions.
+- Desament i càrrega de fitxers JSON.
+- Gestió de fitxers JSON inexistents o mal formats.
+
+També s'ha executat el flux principal de terminal amb dades sintètiques: el programa ha analitzat les tres configuracions i ha recomanat l'endoll B en l'exemple inclòs.
+
+Nota: les dades de demostració són sintètiques, no mesures reals d'un habitatge. La interfície Flet està implementada però encara cal validar-la en un ordinador amb Flet instal·lat.

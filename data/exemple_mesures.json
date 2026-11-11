@@ -1,0 +1,39 @@
+{
+  "versio": 1,
+  "desat_utc": "2026-11-11T10:00:00+00:00",
+  "punts": ["Menjador", "Dormitori", "Cuina", "Despatx", "Passadis"],
+  "llindar": -67,
+  "configuracions": [
+    {
+      "nom": "Router sense repetidor",
+      "mesures": {
+        "Menjador": -48,
+        "Dormitori": -82,
+        "Cuina": -65,
+        "Despatx": -78,
+        "Passadis": -70
+      }
+    },
+    {
+      "nom": "Repetidor - endoll A",
+      "mesures": {
+        "Menjador": -52,
+        "Dormitori": -63,
+        "Cuina": -61,
+        "Despatx": -76,
+        "Passadis": -66
+      }
+    },
+    {
+      "nom": "Repetidor - endoll B",
+      "mesures": {
+        "Menjador": -55,
+        "Dormitori": -60,
+        "Cuina": -64,
+        "Despatx": -70,
+        "Passadis": -65
+      }
+    }
+  ],
+  "nota": "Dades sintètiques d'exemple; no són mesures reals d'un habitatge."
+}
