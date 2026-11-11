@@ -11,7 +11,7 @@ def convertir_rssi(valor, nom_camp="RSSI"):
     except ValueError:
         raise ValueError(f"El valor de {nom_camp} no és un número vàlid.")
 
-    if numero < -120 or numero > 0:
+    if not -120 <= numero <= 0:
         raise ValueError(f"El valor de {nom_camp} ha d'estar entre -120 i 0 dBm.")
 
     return numero
