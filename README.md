@@ -1,34 +1,36 @@
 # Assistent per triar la ubicació d'un repetidor Wi-Fi
 
-Aplicació en Python amb Flet per comparar tres configuracions Wi-Fi a partir de mesures RSSI introduïdes manualment en cinc punts d'un habitatge.
+## Versió beta L3
 
-## Què fa l'aplicació?
+Aquesta és una primera versió executable del projecte. Permet introduir les mesures RSSI, comparar les tres configuracions i veure quina ofereix millor cobertura.
 
-1. Permet introduir cinc punts de mesura i un llindar RSSI.
-2. Recull cinc mesures per a cadascuna de les tres configuracions: router sol, repetidor a l'endoll A i repetidor a l'endoll B.
-3. Compta quants punts arriben al llindar.
-4. En cas d'empat, compara el senyal del punt més feble.
-5. Mostra la configuració recomanada i els punts amb cobertura insuficient.
-6. Permet desar i carregar les mesures en un fitxer JSON.
+## Funcionalitats de la beta
 
-Les mesures s'obtenen amb una eina externa d'anàlisi Wi-Fi i s'introdueixen manualment. L'aplicació no mesura el senyal automàticament.
+- Introduir els noms de cinc punts de mesura.
+- Introduir les quinze mesures RSSI en dBm.
+- Escollir el llindar mínim de senyal.
+- Comparar el router sense repetidor amb dues ubicacions candidates del repetidor.
+- Mostrar quants punts compleixen el llindar i quins punts tenen un senyal més feble.
+- Recomanar una configuració o indicar un empat.
+
+Les mesures s'obtenen amb una eina externa i s'introdueixen manualment. L'aplicació no mesura el Wi-Fi automàticament.
 
 ## Requisits
 
 - Python 3.10 o superior.
 - Flet 1.1.2.
 
-## Obrir i executar amb Visual Studio Code (Windows)
+## Executar amb Visual Studio Code (Windows)
 
-1. Obre la carpeta del projecte amb Visual Studio Code.
-2. Obre el terminal integrat: **Terminal > New Terminal**.
+1. Obre aquesta carpeta amb Visual Studio Code.
+2. Obre el terminal: **Terminal > New Terminal**.
 3. Crea l'entorn virtual:
 
 ```powershell
 python -m venv .venv
 ```
 
-4. Instal·la Flet dins de l'entorn virtual:
+4. Instal·la Flet:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -40,32 +42,31 @@ python -m venv .venv
 .\.venv\Scripts\flet.exe run main.py
 ```
 
-## Proves
-
-Per executar les proves automatitzades:
+## Proves inicials
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-## Estructura del projecte
+Les proves comproven els dos criteris de comparació, els empats i la detecció de dades incompletes o incorrectes.
+
+## Estructura
 
 - `main.py`: interfície gràfica amb Flet.
-- `models.py`: classes de les configuracions i dels resultats.
-- `analisi.py`: validació de les mesures i comparació de cobertura.
-- `storage.py`: desament i càrrega de dades JSON.
-- `data/`: fitxer amb mesures d'exemple.
-- `tests/`: proves de l'algoritme i de l'emmagatzematge.
+- `models.py`: classes per representar les configuracions i els resultats.
+- `analisi.py`: validació de les mesures i algoritme de comparació.
+- `tests/`: proves inicials de l'algoritme.
+- `requirements.txt`: biblioteca necessària per a la interfície.
 
-## Estat de la versió beta
+## Dificultats trobades
 
-La interfície gràfica s'ha executat correctament i s'ha comprovat el flux principal d'introducció de mesures i comparació de les tres configuracions amb dades d'exemple. Les proves automatitzades de l'algoritme i de l'emmagatzematge també s'han executat correctament.
+La principal dificultat és interpretar correctament els valors RSSI, ja que són negatius i els valors més propers a zero indiquen un senyal més fort. També cal comprovar que les tres configuracions utilitzin els mateixos cinc punts i que no falti cap mesura.
 
-Queda pendent provar el desament i la recuperació des de la interfície amb una sessió completa i fer mesures reals en un habitatge.
+## Feina pendent després de la beta
 
-## Limitacions
+- Afegir el desament i la recuperació de mesures amb fitxers JSON.
+- Fer proves amb mesures reals d'un habitatge.
+- Comprovar l'ús de l'aplicació des del navegador d'un mòbil.
+- Revisar possibles errors i millorar la presentació dels resultats.
 
-- Es comparen cinc punts i tres configuracions fixes.
-- Les mesures s'introdueixen manualment.
-- S'utilitza un únic llindar per a les tres configuracions.
-- Només s'avalua el nivell RSSI; no es mesuren velocitat, latència ni interferències.
+Aquesta beta només implementa el flux principal de comparació. Les funcions de desament i càrrega s'incorporaran en una versió posterior.
