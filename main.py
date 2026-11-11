@@ -1,13 +1,8 @@
-from pathlib import Path
-
 import flet as ft
 
 from analisi import comparar_configuracions, convertir_rssi
 from models import Configuracio
 from storage import carregar_dades, guardar_dades
-
-DIRECTORI = Path(__file__).resolve().parent
-FITXER_DADES = DIRECTORI / "data" / "mesures.json"
 
 NOMS_CONFIGURACIO = [
     "Router sense repetidor",
@@ -16,46 +11,47 @@ NOMS_CONFIGURACIO = [
 ]
 
 PUNTS_PER_DEFECTE = ["Menjador", "Dormitori", "Cuina", "Despatx", "Passadís"]
+FITXER_DADES = "mesures.json"
 
 
-def main(page: ft.Page):
+def main(page):
     page.title = "Assistent Wi-Fi"
     page.padding = 16
     page.scroll = ft.ScrollMode.AUTO
 
-    threshold_field = ft.TextField(label="Llindar mínim (dBm)", value="-67", width=210)
-    name_fields = []
-    measurement_fields = {}
-    cards = []
+    camp_llindar = ft.TextField(label="Llindar mínim (dBm)", value="-67", width=210)
+    camps_punts = []
+    camps_mesures = []
+    targetes = []
 
-    for i, nom in enumerate(PUNTS_PER_DEFECTE):
-        name_fields.append(
-            ft.TextField(label=f"Nom del punt {i + 1}", value=nom, expand=True)
+    for i in range(5):
+        camp = ft.TextField(
+            label="Nom del punt " + str(i + 1),
+            value=PUNTS_PER_DEFECTE[i],
+            expand=True
         )
+        camps_punts.append(camp)
 
-    for point_index in range(5):
-        fields_for_point = []
+    for i in range(5):
+        camps_configuracio = []
 
-        for config_index, config_name in enumerate(NOMS_CONFIGURACIO):
-            field = ft.TextField(
-                label=config_name,
+        for j in range(3):
+            camp = ft.TextField(
+                label=NOMS_CONFIGURACIO[j],
                 hint_text="Ex. -65",
                 width=220
             )
-            measurement_fields[(point_index, config_index)] = field
-            fields_for_point.append(field)
+            camps_configuracio.append(camp)
 
-        cards.append(
+        camps_mesures.append(camps_configuracio)
+
+        targetes.append(
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text(
-                            f"Punt de mesura {point_index + 1}",
-                            size=17,
-                            weight=ft.FontWeight.BOLD
-                        ),
-                        name_fields[point_index],
-                        ft.Column(fields_for_point, spacing=6)
+                        ft.Text("Punt de mesura " + str(i + 1), weight=ft.FontWeight.BOLD),
+                        camps_punts[i],
+                        ft.Column(camps_configuracio, spacing=6)
                     ],
                     spacing=8
                 ),
@@ -65,32 +61,35 @@ def main(page: ft.Page):
             )
         )
 
-    status = ft.Text(
-        "Introdueix els noms dels punts, les 15 mesures i el llindar.",
-        color="#475569"
-    )
-    results_panel = ft.Column(spacing=8)
+    missatge = ft.Text("Introdueix els noms dels punts, les 15 mesures i el llindar.")
+    resultats = ft.Column(spacing=8)
 
     def recollir_dades():
         punts = []
-        for field in name_fields:
-            nom = field.value.strip()
-            if not nom:
-                raise ValueError("Cal introduir el nom dels cinc punts.")
+
+        for i in range(5):
+            nom = camps_punts[i].value.strip()
+
+            if nom == "":
+                raise ValueError("Cal escriure el nom dels cinc punts.")
+
             if nom in punts:
                 raise ValueError("Els noms dels punts han de ser diferents.")
+
             punts.append(nom)
 
-        llindar = convertir_rssi(threshold_field.value, "llindar")
+        llindar = convertir_rssi(camp_llindar.value, "llindar")
         configuracions = []
 
-        for config_index, config_name in enumerate(NOMS_CONFIGURACIO):
+        for j in range(3):
             mesures = {}
-            for point_index, punt in enumerate(punts):
-                valor = measurement_fields[(point_index, config_index)].value
-                mesures[punt] = convertir_rssi(valor, f"{config_name} / {punt}")
 
-            configuracions.append(Configuracio(config_name, mesures))
+            for i in range(5):
+                valor = camps_mesures[i][j].value
+                nom_camp = NOMS_CONFIGURACIO[j] + " / " + punts[i]
+                mesures[punts[i]] = convertir_rssi(valor, nom_camp)
+
+            configuracions.append(Configuracio(NOMS_CONFIGURACIO[j], mesures))
 
         return punts, llindar, configuracions
 
@@ -98,36 +97,31 @@ def main(page: ft.Page):
         try:
             punts, llindar, configuracions = recollir_dades()
             comparacio = comparar_configuracions(configuracions, llindar)
-            results_panel.controls.clear()
+            resultats.controls.clear()
 
-            if len(comparacio["guanyadores"]) > 1:
-                recomanacio = "Empat: " + ", ".join(comparacio["guanyadores"])
-            else:
+            if len(comparacio["guanyadores"]) == 1:
                 recomanacio = "Configuració recomanada: " + comparacio["guanyadores"][0]
+            else:
+                recomanacio = "Empat entre: " + ", ".join(comparacio["guanyadores"])
 
-            results_panel.controls.append(
-                ft.Text(
-                    recomanacio,
-                    size=18,
-                    weight=ft.FontWeight.BOLD,
-                    color="#166534"
-                )
+            resultats.controls.append(
+                ft.Text(recomanacio, size=18, weight=ft.FontWeight.BOLD)
             )
 
             for resultat in comparacio["resultats"]:
-                if resultat.punts_febles:
-                    punts_febles = ", ".join(resultat.punts_febles)
+                if len(resultat.punts_febles) > 0:
+                    febles = ", ".join(resultat.punts_febles)
                 else:
-                    punts_febles = "Cap"
+                    febles = "Cap"
 
-                results_panel.controls.append(
+                resultats.controls.append(
                     ft.Container(
                         content=ft.Column(
                             [
                                 ft.Text(resultat.nom, weight=ft.FontWeight.BOLD, size=16),
-                                ft.Text(f"Punts amb cobertura suficient: {resultat.punts_correctes}/5"),
-                                ft.Text(f"Senyal del punt més feble: {resultat.senyal_minim:g} dBm"),
-                                ft.Text(f"Punts per sota del llindar: {punts_febles}")
+                                ft.Text("Cobertura suficient: " + str(resultat.punts_correctes) + "/5 punts"),
+                                ft.Text("Senyal del punt més feble: " + str(resultat.senyal_minim) + " dBm"),
+                                ft.Text("Punts per sota del llindar: " + febles)
                             ],
                             spacing=4
                         ),
@@ -137,13 +131,13 @@ def main(page: ft.Page):
                     )
                 )
 
-            status.value = "Anàlisi completada correctament."
-            status.color = "#166534"
+            missatge.value = "Anàlisi completada correctament."
+            missatge.color = "#166534"
 
         except ValueError as error:
-            results_panel.controls.clear()
-            status.value = str(error)
-            status.color = "#b91c1c"
+            resultats.controls.clear()
+            missatge.value = str(error)
+            missatge.color = "#b91c1c"
 
         page.update()
 
@@ -151,81 +145,114 @@ def main(page: ft.Page):
         try:
             punts, llindar, configuracions = recollir_dades()
             guardar_dades(punts, llindar, configuracions, FITXER_DADES)
-            status.value = "Mesures desades correctament."
-            status.color = "#166534"
+            missatge.value = "Mesures desades correctament a " + FITXER_DADES + "."
+            missatge.color = "#166534"
         except (ValueError, OSError) as error:
-            status.value = str(error)
-            status.color = "#b91c1c"
+            missatge.value = str(error)
+            missatge.color = "#b91c1c"
 
         page.update()
 
     def carregar_click(e):
         try:
             dades = carregar_dades(FITXER_DADES)
+            punts = []
 
-            if len(dades["punts"]) != 5 or len(dades["configuracions"]) != 3:
-                raise ValueError("El fitxer no té cinc punts i tres configuracions.")
+            for i in range(5):
+                nom = dades["punts"][i]
+                try:
+                    nom = nom.strip()
+                except AttributeError:
+                    raise ValueError("El nom d'un punt del fitxer no és correcte.")
 
-            threshold_field.value = str(dades["llindar"])
+                if nom == "":
+                    raise ValueError("El nom d'un punt del fitxer no és correcte.")
 
-            for index, punt in enumerate(dades["punts"]):
-                name_fields[index].value = str(punt)
+                if nom in punts:
+                    raise ValueError("El fitxer conté noms de punts repetits.")
 
-            for config_index, configuracio in enumerate(dades["configuracions"]):
-                for point_index, punt in enumerate(dades["punts"]):
-                    valor = configuracio["mesures"].get(punt, "")
-                    measurement_fields[(point_index, config_index)].value = str(valor)
+                punts.append(nom)
 
-            results_panel.controls.clear()
-            status.value = "Mesures carregades correctament."
-            status.color = "#166534"
+            llindar = convertir_rssi(dades["llindar"], "llindar")
+            configuracions = []
 
-        except (ValueError, KeyError, TypeError, OSError) as error:
-            status.value = str(error)
-            status.color = "#b91c1c"
+            for j in range(3):
+                dades_configuracio = dades["configuracions"][j]
+                mesures = {}
+
+                for i in range(5):
+                    punt = punts[i]
+                    if punt not in dades_configuracio["mesures"]:
+                        raise ValueError("Al fitxer falta una mesura del punt " + punt + ".")
+                    valor = convertir_rssi(
+                        dades_configuracio["mesures"][punt],
+                        NOMS_CONFIGURACIO[j] + " / " + punt
+                    )
+                    mesures[punt] = valor
+
+                configuracions.append(Configuracio(NOMS_CONFIGURACIO[j], mesures))
+
+            camp_llindar.value = str(llindar)
+
+            for i in range(5):
+                camps_punts[i].value = punts[i]
+
+            for j in range(3):
+                for i in range(5):
+                    camps_mesures[i][j].value = str(configuracions[j].mesures[punts[i]])
+
+            resultats.controls.clear()
+            missatge.value = "Mesures carregades correctament."
+            missatge.color = "#166534"
+
+        except (ValueError, OSError, KeyError, TypeError, IndexError) as error:
+            missatge.value = str(error)
+            missatge.color = "#b91c1c"
 
         page.update()
 
-    page.add(
-        ft.Column(
+    elements = [
+        ft.Text(
+            "Assistent per triar la ubicació d'un repetidor Wi-Fi",
+            size=24,
+            weight=ft.FontWeight.BOLD
+        ),
+        ft.Text(
+            "Compara el router sol amb dues ubicacions candidates del repetidor. "
+            "Introdueix les mesures RSSI en dBm als mateixos cinc punts i amb el mateix dispositiu."
+        ),
+        ft.Divider(),
+        ft.Text("1. Llindar de cobertura", size=18, weight=ft.FontWeight.BOLD),
+        camp_llindar,
+        ft.Text("2. Mesures de la xarxa", size=18, weight=ft.FontWeight.BOLD)
+    ]
+
+    for targeta in targetes:
+        elements.append(targeta)
+
+    elements.append(
+        ft.Row(
             [
-                ft.Text(
-                    "Assistent per triar la ubicació d'un repetidor Wi-Fi",
-                    size=25,
-                    weight=ft.FontWeight.BOLD
-                ),
-                ft.Text(
-                    "Compara el router sol amb dues ubicacions candidates del repetidor. "
-                    "Introdueix les mesures RSSI en dBm als mateixos cinc punts i amb el mateix dispositiu."
-                ),
-                ft.Divider(),
-                ft.Text("1. Llindar de cobertura", size=19, weight=ft.FontWeight.BOLD),
-                threshold_field,
-                ft.Text("2. Mesures de la xarxa", size=19, weight=ft.FontWeight.BOLD),
-                *cards,
-                ft.Row(
-                    [
-                        ft.FilledButton("Analitzar cobertura", on_click=analitzar_click),
-                        ft.OutlinedButton("Desar mesures", on_click=desar_click),
-                        ft.OutlinedButton("Carregar mesures", on_click=carregar_click)
-                    ],
-                    wrap=True
-                ),
-                status,
-                ft.Divider(),
-                ft.Text("3. Resultats", size=19, weight=ft.FontWeight.BOLD),
-                results_panel,
-                ft.Text(
-                    "Nota: RSSI més proper a 0 dBm significa un senyal més fort. "
-                    "L'aplicació no mesura el Wi-Fi automàticament; les dades s'introdueixen manualment.",
-                    size=12,
-                    color="#64748b"
-                )
+                ft.FilledButton("Analitzar cobertura", on_click=analitzar_click),
+                ft.OutlinedButton("Desar mesures", on_click=desar_click),
+                ft.OutlinedButton("Carregar mesures", on_click=carregar_click)
             ],
-            spacing=12,
-            expand=True
+            wrap=True
         )
     )
+    elements.append(missatge)
+    elements.append(ft.Divider())
+    elements.append(ft.Text("3. Resultats", size=18, weight=ft.FontWeight.BOLD))
+    elements.append(resultats)
+    elements.append(
+        ft.Text(
+            "Les mesures s'introdueixen manualment. Un valor RSSI més proper a 0 dBm indica un senyal més fort.",
+            size=12,
+            color="#64748b"
+        )
+    )
+
+    page.add(ft.Column(elements, spacing=12))
 
 
 if __name__ == "__main__":
